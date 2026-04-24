@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#07110e" />
+  <meta name="apple-mobile-web-app-title" content="VICTO" />
+  <title>VICTO</title>
+  <style>
+    :root {
+      --bg: #07110e;
+      --top: #0c1d17;
+      --panel: #101f1a;
+      --panel2: #172b23;
+      --panel3: #21392f;
+      --text: #f3fff8;
+      --muted: #9bb0a7;
+      --line: rgba(255,255,255,.08);
+      --yellow: #d89c12;
+      --yellow2: #f0bd37;
+      --green: #20d17b;
+      --red: #ff565f;
+      --orange: #ff9f1a;
+      --bottom-safe: env(safe-area-inset-bottom, 0px);
+      --top-safe: env(safe-area-inset-top, 0px);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      overscroll-behavior: none;
+      touch-action: manipulation;
+    }
+
+    body { position: fixed; inset: 0; }
+
+    .app {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100dvh;
+      min-height: -webkit-fill-available;
+      background:
+        radial-gradient(circle at top right, rgba(216,156,18,.16), transparent 34%),
+        linear-gradient(180deg, #0b1b16 0%, var(--bg) 34%);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      flex: none;
+      height: calc(58px + var(--top-safe));
+      padding: calc(12px + var(--top-safe)) 14px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(180deg, rgba(12,29,23,.98), rgba(7,17,14,.94));
+      border-bottom: 1px solid var(--line);
+      z-index: 20;
+    }
+
+    .brand { display: flex; align-items: center; gap: 9px; font-weight: 950; letter-spacing: -.35px; }
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--yellow), var(--yellow2));
+      color: #0d1204;
+      font-weight: 1000;
+      box-shadow: 0 0 18px rgba(216,156,18,.22);
+    }
+
+    .wallet {
+      border: 1px solid var(--line);
+      background: #091511;
+      border-radius: 999px;
+      padding: 8px 11px;
+      font-size: 13px;
+      font-weight: 950;
+      transition: .22s ease;
+      min-width: 96px;
+      text-align: right;
+    }
+    .wallet.low { color: #ffd2d4; border-color: rgba(255,86,95,.45); background: rgba(255,86,95,.1); }
+    .wallet.empty { color: #fff; border-color: rgba(255,86,95,.7); background: rgba(255,86,95,.22); }
+
+    .pages {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 14px 14px 74px;
+      scrollbar-width: none;
+    }
+    .screen::-webkit-scrollbar { display: none; }
+    .screen.active { display: block; animation: slide .16s ease-out; }
+    @keyframes slide { from { opacity: .55; transform: translateX(8px); } to { opacity: 1; transform: translateX(0); } }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 64px;
+      background: rgba(7,17,14,.98);
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      z-index: 50;
+    }
+    .bottom-nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 0;
+    }
+    .bottom-nav b { font-size: 20px; line-height: 1; }
+    .bottom-nav button.active { color: var(--yellow2); }
+
+    .hero {
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, #19382d, #0d1814 70%);
+      border-radius: 24px;
+      padding: 16px;
+      margin-bottom: 12px;
+      min-height: 124px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero:after {
+      content: "";
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      right: -44px;
+      top: -44px;
+      border-radius: 50%;
+      background: rgba(216,156,18,.18);
+    }
+    .hero h1 { margin: 6px 0 8px; font-size: 25px; line-height: 1.02; letter-spacing: -.9px; }
+    .hero p { margin: 0; max-width: 245px; color: var(--muted); font-size: 13px; line-height: 1.35; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: var(--panel2);
+      color: var(--yellow2);
+      font-size: 11px;
+      font-weight: 950;
+      margin-bottom: 8px;
+    }
+    .tag.red { background: rgba(255,86,95,.15); color: #ffd0d3; }
+    .tag.green { background: rgba(32,209,123,.14); color: #bcffd9; }
+
+    .notice {
+      border: 1px solid rgba(255,86,95,.25);
+      background: rgba(255,86,95,.11);
+      color: #ffd6d8;
+      border-radius: 17px;
+      padding: 11px 12px;
+      font-size: 12px;
+      line-height: 1.35;
+      margin-bottom: 12px;
+    }
+
+    .row-title { display: flex; align-items: center; justify-content: space-between; margin: 14px 2px 9px; }
+    .row-title h2 { margin: 0; font-size: 16px; }
+    .row-title span { color: var(--muted); font-size: 12px; }
+
+    .pill-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+    .pill-row::-webkit-scrollbar { display: none; }
+    .pill {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 9px 12px;
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .pill.active { background: linear-gradient(180deg, var(--yellow2), var(--yellow)); color: #151000; border-color: transparent; }
+
+    .card {
+      border: 1px solid var(--line);
+      background: rgba(16,31,26,.96);
+      border-radius: 20px;
+      padding: 13px;
+      margin-bottom: 10px;
+    }
+    .match-head { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+    .teams { display: grid; grid-template-columns: 1fr 52px 1fr; align-items: center; gap: 8px; font-weight: 900; }
+    .team:last-child { text-align: right; }
+    .score { text-align: center; color: var(--yellow2); font-size: 12px; font-weight: 950; }
+    .odds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+    .odd {
+      border: 1px solid rgba(255,255,255,.07);
+      background: var(--panel2);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 6px;
+      font-weight: 950;
+      text-align: center;
+      font-size: 14px;
+    }
+    .odd small { display: block; color: var(--muted); font-size: 10px; font-weight: 800; margin-bottom: 2px; }
+    .odd.selected { background: linear-gradient(180deg, var(--yellow2), var(--yellow)); color: #151000; border-color: transparent; }
+    .odd.selected small { color: #493200; }
+
+    .list-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      background: var(--panel2);
+      font-size: 20px;
+      flex: none;
+    }
+    .grow { flex: 1; min-width: 0; }
+    .muted { color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .arrow { color: var(--muted); font-weight: 950; }
+
+    .search {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 18px;
+      padding: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .yellow-btn, .ghost-btn, .danger-btn {
+      width: 100%;
+      border-radius: 17px;
+      padding: 14px;
+      margin-top: 10px;
+      font-size: 15px;
+      font-weight: 950;
+      border: 0;
+    }
+    .yellow-btn { background: linear-gradient(180deg, var(--yellow2), var(--yellow)); color: #151000; box-shadow: 0 10px 24px rgba(216,156,18,.14); }
+    .ghost-btn { background: var(--panel2); color: var(--text); border: 1px solid var(--line); }
+    .danger-btn { background: rgba(255,86,95,.12); color: #ffd4d6; border: 1px solid rgba(255,86,95,.28); }
+
+    .ticket { border: 1px dashed rgba(255,255,255,.16); background: var(--panel); border-radius: 22px; padding: 15px; margin-bottom: 12px; }
+    .ticket.win { border-color: rgba(32,209,123,.45); }
+    .ticket.lost { border-color: rgba(255,86,95,.55); background: rgba(255,86,95,.055); }
+    .ticket.pending { border-color: rgba(216,156,18,.42); }
+    .ticket strong { display: block; margin-bottom: 4px; }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .field { border: 1px solid var(--line); background: #081511; border-radius: 16px; padding: 12px; }
+    .field label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 5px; }
+    .field strong { font-size: 20px; }
+
+    .slip-float {
+      position: fixed;
+      left: 14px;
+      right: 14px;
+      bottom: 74px;
+      z-index: 45;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 18px;
+      padding: 13px 14px;
+      color: #151000;
+      background: linear-gradient(135deg, var(--yellow), var(--yellow2));
+      font-weight: 950;
+      box-shadow: 0 18px 34px rgba(0,0,0,.35);
+    }
+    .slip-float.show { display: flex; }
+    .slip-float button { border: 0; background: #111309; color: #fff; border-radius: 999px; padding: 9px 13px; font-weight: 950; }
+
+    .toast {
+      position: fixed;
+      left: 14px;
+      right: 14px;
+      top: calc(70px + var(--top-safe));
+      z-index: 60;
+      display: none;
+      border: 1px solid rgba(216,156,18,.24);
+      background: rgba(10,22,18,.96);
+      color: var(--text);
+      border-radius: 17px;
+      padding: 12px;
+      font-size: 12px;
+      box-shadow: 0 18px 42px rgba(0,0,0,.34);
+    }
+    .toast.show { display: block; animation: slide .16s ease-out; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.58);
+      display: none;
+      align-items: flex-end;
+      z-index: 80;
+    }
+    .modal.show { display: flex; }
+    .modal-card {
+      width: 100%;
+      border-top: 1px solid var(--line);
+      background: #0a1511;
+      border-radius: 28px 28px 0 0;
+      padding: 22px 16px 24px;
+      animation: up .18s ease-out;
+    }
+    @keyframes up { from { transform: translateY(28px); opacity: .65; } to { transform: translateY(0); opacity: 1; } }
+    .modal-content { text-align: center; padding: 10px 4px 2px; }
+    .symbol {
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 14px;
+      font-size: 36px;
+      font-weight: 1000;
+    }
+    .symbol.win { background: var(--green); color: #01140a; }
+    .symbol.lost { background: var(--red); color: #220204; }
+    .symbol.pending { background: var(--yellow); color: #151000; }
+
+    .hidden-admin { margin-top: 28px; opacity: .7; }
+    .empty-state { text-align: center; color: var(--muted); padding: 26px 10px; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><div class="brand-mark">V</div><span>VICTO</span></div>
+      <div id="wallet" class="wallet">352,40 €</div>
+    </header>
+
+    <div class="pages">
+      <main id="home" class="screen active">
+        <section class="hero">
+          <span class="tag">Soirée sport</span>
+          <h1>Paris en direct,<br>cotes boostées</h1>
+          <p>Suivez les plus grandes affiches et vos tickets en temps réel.</p>
+        </section>
+        <div class="notice">Les gains ne sont jamais garantis. Les mises répétées peuvent entraîner des pertes importantes.</div>
+        <div class="pill-row">
+          <button class="pill active">Top</button>
+          <button class="pill" onclick="go('sport-foot')">Football</button>
+          <button class="pill" onclick="go('sport-tennis')">Tennis</button>
+          <button class="pill" onclick="go('sport-basket')">Basket</button>
+          <button class="pill" onclick="go('live')">Live</button>
+        </div>
+        <div class="row-title"><h2>À la une</h2><span>En ce moment</span></div>
+        <div id="featuredMatches"></div>
+      </main>
+
+      <main id="sports" class="screen">
+        <div class="search">🔎 Rechercher une équipe ou une compétition</div>
+        <div class="row-title"><h2>Sports</h2><span>Populaires</span></div>
+        <div id="sportsList"></div>
+      </main>
+
+      <main id="tickets" class="screen">
+        <div class="row-title"><h2>Mes tickets</h2><span id="ticketStatus">Activité récente</span></div>
+        <div id="ticketsList"></div>
+      </main>
+
+      <main id="slip" class="screen">
+        <div class="row-title"><h2>Ticket de pari</h2><span id="slipLabel">1 sélection</span></div>
+        <div class="card">
+          <span class="tag">Sélection</span>
+          <h2 id="pickName" style="margin:0 0 6px">Paris Nord gagne</h2>
+          <div id="pickMeta" class="muted">Football · Résultat du match</div>
+          <div class="grid2">
+            <div class="field"><label>Cote</label><strong id="pickOdd">1.82</strong></div>
+            <div class="field"><label>Mise</label><strong id="stakeAmount">35 €</strong></div>
+          </div>
+          <div class="field" style="margin-top:10px"><label>Gain potentiel</label><strong id="potentialWin">63,70 €</strong></div>
+          <button class="yellow-btn" onclick="confirmBet()">Valider le ticket</button>
+          <button class="ghost-btn" onclick="go('home')">Modifier la sélection</button>
+        </div>
+      </main>
+
+      <main id="account" class="screen">
+        <section class="hero">
+          <span class="tag">Compte vérifié</span>
+          <h1>Bonjour,<br>Alex</h1>
+          <p>Consultez votre solde, vos transactions et vos paramètres.</p>
+        </section>
+        <div class="card list-row"><div><strong>Solde disponible</strong><div class="muted">Mise à jour instantanée</div></div><strong id="accountBalance" style="color:var(--yellow2)">352,40 €</strong></div>
+        <div class="card list-row"><div><strong>Total misé aujourd'hui</strong><div class="muted">Tickets validés</div></div><strong id="totalStaked">0,00 €</strong></div>
+        <div class="card list-row"><div><strong>Résultat net</strong><div class="muted">Gains moins mises</div></div><strong id="netResult" style="color:var(--red)">0,00 €</strong></div>
+        <div class="card list-row" onclick="go('cashier')"><div class="icon">💳</div><div class="grow"><strong>Caisse</strong><div class="muted">Dépôts, retraits, transactions</div></div><span class="arrow">›</span></div>
+        <div class="card list-row" onclick="go('settings')"><div class="icon">⚙</div><div class="grow"><strong>Réglages</strong><div class="muted">Sécurité, notifications, limites</div></div><span class="arrow">›</span></div>
+      </main>
+
+      <div id="dynamicScreens"></div>
+    </div>
+
+    <div id="slipFloat" class="slip-float"><span id="floatPick">1 sélection · 1.82</span><button onclick="go('slip')">Ticket</button></div>
+    <div id="toast" class="toast"></div>
+
+    <nav class="bottom-nav">
+      <button class="active" onclick="go('home')"><b>⌂</b>Accueil</button>
+      <button onclick="go('sports')"><b>◉</b>Sports</button>
+      <button onclick="go('tickets')"><b>▤</b>Tickets</button>
+      <button onclick="go('slip')"><b>◆</b>Panier</button>
+      <button onclick="go('account')"><b>☻</b>Compte</button>
+    </nav>
+
+    <div id="modal" class="modal" onclick="closeModal(event)">
+      <div class="modal-card"><div id="modalContent" class="modal-content"></div></div>
+    </div>
+  </div>
+
+  <script>
+    const START_BALANCE = 352.40;
+    const DEFAULT_STAKE = 35;
+
+    let balance = START_BALANCE;
+    let totalStaked = 0;
+    let totalWon = 0;
+    let betCount = 0;
+    let interactions = 0;
+    let selected = { team: 'Paris Nord gagne', odd: 1.82, sport: 'Football', market: 'Résultat du match' };
+
+    const sports = [
+      { id:'sport-foot', icon:'⚽', name:'Football', desc:'Ligue Hexa, coupes, live', matches:[['Paris Nord','Madrid Sud','21:00',1.82,3.40,4.10],['Olympique Azur','Racing Ouest','20:30',2.05,3.10,3.75],['United Est','Club Atlantique','22:00',1.48,3.80,4.80]] },
+      { id:'sport-tennis', icon:'🎾', name:'Tennis', desc:'Open, challengers, doubles', matches:[['L. Moreau','D. Novak','Set 2',1.54,1.95,2.35],['M. Caron','A. Vidal','18:15',2.20,1.82,1.66],['R. Klein','P. Sousa','19:40',1.72,2.05,2.12]] },
+      { id:'sport-basket', icon:'🏀', name:'Basket', desc:'Europe, USA, national', matches:[['Lyon Métro','Marseille Port','19:45',1.88,1.91,2.04],['Berlin City','Roma Club','20:00',1.62,2.10,2.48],['Nord Stars','Sud Waves','21:30',2.30,1.86,1.58]] },
+      { id:'sport-rugby', icon:'🏉', name:'Rugby', desc:'Top ligues et internationaux', matches:[['Toulouse Rouge','Bordeaux Blanc','20:55',1.46,18.0,2.90],['Ovalie Nord','Sud XV','16:30',2.10,16.0,1.80]] },
+      { id:'sport-hand', icon:'🤾', name:'Handball', desc:'Championnat et coupes', matches:[['Nantes Main','Paris Cercle','18:00',2.05,7.40,1.72],['Lille Nord','Nice Bleu','20:10',1.90,8.00,2.00]] },
+      { id:'sport-hockey', icon:'🏒', name:'Hockey', desc:'Glace et ligues européennes', matches:[['Alpes Ice','Rouen Nord','19:00',2.18,3.80,2.40],['Lions Gel','Bears City','21:00',1.72,4.10,3.20]] },
+      { id:'sport-volley', icon:'🏐', name:'Volley', desc:'Clubs, sélections, live', matches:[['Tours Bloc','Montpellier Filet','17:45',1.67,2.05,2.55],['Nice Serve','Paris Smash','20:15',2.44,1.90,1.61]] },
+      { id:'sport-baseball', icon:'⚾', name:'Baseball', desc:'Séries et matchs du soir', matches:[['East Bats','West Caps','22:30',1.95,2.00,1.88],['River Sox','City Fox','23:10',2.15,1.84,1.72]] },
+      { id:'sport-cycling', icon:'🚴', name:'Cyclisme', desc:'Étapes et classements', matches:[['Tour Central','Étape montagne','Demain',2.80,5.40,1.44],['Sprint final','Classement points','Live',1.92,2.30,3.00]] },
+      { id:'sport-fight', icon:'🥊', name:'Combat', desc:'Boxe et affiches du soir', matches:[['N. Stone','K. Silva','23:55',1.70,18.0,2.15],['A. Moreno','B. King','00:30',2.05,15.0,1.82]] },
+      { id:'sport-esport', icon:'🎮', name:'E-sport', desc:'Arènes numériques', matches:[['Pixel Red','Nova Blue','Live',1.58,2.20,2.55],['Gamma Five','Orbit Club','21:15',1.91,2.00,1.93]] },
+      { id:'live', icon:'●', name:'Live', desc:'Événements en cours', matches:[['L. Moreau','D. Novak','6-4 2-1',1.54,1.95,2.35],['Pixel Red','Nova Blue','Carte 3',1.58,2.20,2.55],['Sprint final','Classement points','Live',1.92,2.30,3.00]] },
+      { id:'boosts', icon:'⚡', name:'Cotes boostées', desc:'Sélections mises en avant', matches:[['Paris Nord','Madrid Sud','Boost',2.05,3.60,4.40],['Lyon Métro','Marseille Port','Boost',2.10,1.95,2.28]] },
+      { id:'favorites', icon:'★', name:'Favoris', desc:'Équipes suivies', matches:[['Paris Nord','Madrid Sud','21:00',1.82,3.40,4.10],['Tours Bloc','Montpellier Filet','17:45',1.67,2.05,2.55]] },
+      { id:'results', icon:'✓', name:'Résultats', desc:'Scores récents', matches:[['Tennis live','Ticket finalisé','Terminé',1.54,1.95,2.35],['Basket total','Résultat publié','Hier',1.88,1.91,2.04]] },
+      { id:'promos', icon:'🎁', name:'Promotions', desc:'Offres et boosts', matches:[['Boost combiné','3 sélections','Ce soir',1.20,1.40,1.60]] },
+      { id:'limits', icon:'🛑', name:'Limites', desc:'Plafonds et contrôle', matches:[] },
+      { id:'history', icon:'↺', name:'Historique', desc:'Activité récente', matches:[] },
+      { id:'cashier', icon:'💳', name:'Caisse', desc:'Transactions', matches:[] },
+      { id:'settings', icon:'⚙', name:'Réglages', desc:'Sécurité et préférences', matches:[] }
+    ];
+
+    const scriptedResults = ['win','lost','lost','lost','win','lost','lost','lost','lost','lost'];
+    const extraLosses = [0, 18.40, 24.00, 42.60, 0, 36.00, 48.00, 55.00, 58.00, 70.00];
+
+    function money(v) { return `${Math.max(0, v).toFixed(2).replace('.', ',')} €`; }
+
+    function renderAll() {
+      document.getElementById('featuredMatches').innerHTML = sports[0].matches.map(m => renderMatch(m, 'Football')).join('');
+      document.getElementById('sportsList').innerHTML = sports.map(s => `
+        <div class="card list-row" onclick="go('${s.id}')">
+          <div class="icon">${s.icon}</div>
+          <div class="grow"><strong>${s.name}</strong><div class="muted">${s.desc}</div></div>
+          <span class="arrow">›</span>
+        </div>
+      `).join('');
+      document.getElementById('dynamicScreens').innerHTML = sports.map(renderSportPage).join('');
+      renderTicketsSeed();
+      updateUI();
+      updateSlip();
+    }
+
+    function renderMatch(m, sportName) {
+      return `
+        <div class="card">
+          <div class="match-head"><span>${sportName} · ${m[2]}</span><span>+${42 + Math.floor(Math.random()*80)} marchés</span></div>
+          <div class="teams"><div class="team">${m[0]}</div><div class="score">VS</div><div class="team">${m[1]}</div></div>
+          <div class="odds">
+            <button class="odd" onclick="selectOdd(this, '${safe(m[0])} gagne', ${m[3]}, '${safe(sportName)}', 'Résultat du match')"><small>1</small>${m[3].toFixed(2)}</button>
+            <button class="odd" onclick="selectOdd(this, 'Option spéciale', ${m[4]}, '${safe(sportName)}', 'Marché spécial')"><small>N/+</small>${m[4].toFixed(2)}</button>
+            <button class="odd" onclick="selectOdd(this, '${safe(m[1])} gagne', ${m[5]}, '${safe(sportName)}', 'Résultat du match')"><small>2</small>${m[5].toFixed(2)}</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSportPage(s) {
+      if (s.id === 'settings') return renderSettingsPage(s);
+      if (s.id === 'cashier') return renderCashierPage(s);
+      if (s.id === 'history') return renderHistoryPage(s);
+      if (s.id === 'limits') return renderLimitsPage(s);
+      const content = s.matches.length ? s.matches.map(m => renderMatch(m, s.name)).join('') : '<div class="empty-state">Aucun événement disponible pour le moment.</div>';
+      return `
+        <main id="${s.id}" class="screen">
+          <button class="ghost-btn" onclick="go('sports')">← Retour sports</button>
+          <div class="row-title"><h2>${s.icon} ${s.name}</h2><span>${s.desc}</span></div>
+          <div class="pill-row"><button class="pill active">Tous</button><button class="pill">Live</button><button class="pill">Populaires</button><button class="pill">Demain</button></div>
+          ${content}
+        </main>
+      `;
+    }
+
+    function renderCashierPage(s) {
+      return `
+        <main id="${s.id}" class="screen">
+          <button class="ghost-btn" onclick="go('account')">← Retour compte</button>
+          <div class="row-title"><h2>💳 Caisse</h2><span>Transactions</span></div>
+          <div class="card list-row"><div><strong>Solde disponible</strong><div class="muted">Compte principal</div></div><strong id="cashierBalance">${money(balance)}</strong></div>
+          <div class="card list-row"><div class="icon">−</div><div class="grow"><strong>Mise validée</strong><div class="muted">Ticket sport · Aujourd’hui</div></div><strong style="color:var(--red)">-35,00 €</strong></div>
+          <div class="card list-row"><div class="icon">✓</div><div class="grow"><strong>Gain crédité</strong><div class="muted">Ticket tennis · Aujourd’hui</div></div><strong style="color:var(--green)">+53,90 €</strong></div>
+        </main>
+      `;
+    }
+
+    function renderHistoryPage(s) {
+      return `
+        <main id="${s.id}" class="screen">
+          <button class="ghost-btn" onclick="go('sports')">← Retour sports</button>
+          <div class="row-title"><h2>↺ Historique</h2><span>Activité</span></div>
+          <div id="historyList"><div class="empty-state">Vos dernières opérations apparaîtront ici.</div></div>
+        </main>
+      `;
+    }
+
+    function renderLimitsPage(s) {
+      return `
+        <main id="${s.id}" class="screen">
+          <button class="ghost-btn" onclick="go('sports')">← Retour sports</button>
+          <div class="row-title"><h2>🛑 Limites</h2><span>Contrôle</span></div>
+          <div class="card list-row"><div><strong>Plafond journalier</strong><div class="muted">350,00 € maximum</div></div><span class="arrow">›</span></div>
+          <div class="card list-row"><div><strong>Temps d’activité</strong><div class="muted">Alerte après 30 minutes</div></div><span class="arrow">›</span></div>
+          <div class="notice">Vous pouvez définir des limites pour garder le contrôle de votre activité.</div>
+        </main>
+      `;
+    }
+
+    function renderSettingsPage(s) {
+      return `
+        <main id="${s.id}" class="screen">
+          <button class="ghost-btn" onclick="go('account')">← Retour compte</button>
+          <div class="row-title"><h2>⚙ Réglages</h2><span>Préférences</span></div>
+          <div class="card list-row"><div class="icon">🔔</div><div class="grow"><strong>Notifications</strong><div class="muted">Résultats, cotes, alertes</div></div><span class="arrow">›</span></div>
+          <div class="card list-row"><div class="icon">🔐</div><div class="grow"><strong>Sécurité</strong><div class="muted">Connexion et validation</div></div><span class="arrow">›</span></div>
+          <div class="card list-row" onclick="go('limits')"><div class="icon">🛑</div><div class="grow"><strong>Limites de jeu</strong><div class="muted">Plafonds, pauses, activité</div></div><span class="arrow">›</span></div>
+          <div class="hidden-admin">
+            <div class="row-title"><h2 style="font-size:14px">Zone compte</h2><span>Avancé</span></div>
+            <button class="danger-btn" onclick="resetDemo()">Supprimer mon compte</button>
+          </div>
+        </main>
+      `;
+    }
+
+    function safe(str) { return String(str).replace(/'/g, "\\'"); }
+
+    function go(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+      const roots = ['home','sports','tickets','slip','account'];
+      document.querySelectorAll('.bottom-nav button').forEach((btn, i) => btn.classList.toggle('active', roots[i] === id));
+      interactions++;
+      if (interactions === 6) showToast('Résultat disponible : un ticket vient d’être mis à jour.');
+      document.getElementById('slipFloat').classList.toggle('show', !!selected && !['slip','tickets','account'].includes(id));
+    }
+
+    function selectOdd(el, team, odd, sport, market) {
+      document.querySelectorAll('.odd').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selected = { team, odd, sport, market };
+      updateSlip();
+      document.getElementById('slipFloat').classList.add('show');
+      interactions++;
+    }
+
+    function updateSlip() {
+      document.getElementById('pickName').textContent = selected.team;
+      document.getElementById('pickMeta').textContent = `${selected.sport} · ${selected.market}`;
+      document.getElementById('pickOdd').textContent = selected.odd.toFixed(2);
+      document.getElementById('stakeAmount').textContent = money(currentStake());
+      document.getElementById('potentialWin').textContent = money(currentStake() * selected.odd);
+      document.getElementById('floatPick').textContent = `${selected.team.length > 17 ? selected.team.slice(0,17) + '…' : selected.team} · ${selected.odd.toFixed(2)}`;
+    }
+
+    function currentStake() {
+      if (balance <= 0) return 0;
+      if (balance < DEFAULT_STAKE) return balance;
+      return DEFAULT_STAKE;
+    }
+
+    function confirmBet() {
+      const stake = currentStake();
+      if (stake <= 0) { showEmptyBalance(); return; }
+      betCount++;
+      totalStaked += stake;
+      balance = Math.max(0, balance - stake);
+      const outcome = scriptedResults[Math.min(betCount - 1, scriptedResults.length - 1)];
+      updateUI();
+
+      if (outcome === 'win') {
+        const winAmount = Math.round(stake * selected.odd * 100) / 100;
+        totalWon += winAmount;
+        balance = Math.min(START_BALANCE, balance + winAmount);
+        updateUI();
+        addTicket('win', stake, winAmount);
+        showResult('win', stake, winAmount);
+      } else {
+        const extra = Math.min(balance, extraLosses[Math.min(betCount - 1, extraLosses.length - 1)] || 0);
+        if (extra > 0) {
+          setTimeout(() => {
+            balance = Math.max(0, balance - extra);
+            totalStaked += extra;
+            updateUI();
+          }, 450);
+        }
+        addTicket('lost', stake, 0);
+        showResult('lost', stake, 0);
+      }
+      updateSlip();
+    }
+
+    function addTicket(status, stake, winAmount) {
+      const list = document.getElementById('ticketsList');
+      const isWin = status === 'win';
+      const html = `
+        <div class="ticket ${isWin ? 'win' : 'lost'}">
+          <span class="tag ${isWin ? 'green' : 'red'}">${isWin ? 'Gagné' : 'Perdu'}</span>
+          <strong>${selected.team}</strong>
+          <div class="muted">${selected.sport} · Cote ${selected.odd.toFixed(2)} · Mise ${money(stake)}</div>
+          <div class="grid2">
+            <div class="field"><label>${isWin ? 'Gain' : 'Perte'}</label><strong style="color:${isWin ? 'var(--green)' : 'var(--red)'}">${isWin ? '+' : '-'}${money(isWin ? winAmount : stake)}</strong></div>
+            <div class="field"><label>Solde</label><strong>${money(balance)}</strong></div>
+          </div>
+        </div>
+      `;
+      list.insertAdjacentHTML('afterbegin', html);
+      document.getElementById('ticketStatus').textContent = balance === 0 ? 'Solde indisponible' : 'Activité récente';
+    }
+
+    function renderTicketsSeed() {
+      document.getElementById('ticketsList').innerHTML = `
+        <div class="ticket pending"><span class="tag">En cours</span><strong>Combiné football</strong><div class="muted">3 sélections · Gain potentiel 68,64 €</div></div>
+        <div class="ticket win"><span class="tag green">Gagné</span><strong>Tennis live</strong><div class="muted">L. Moreau vainqueur · Gain 30,80 €</div></div>
+        <div class="ticket lost"><span class="tag red">Perdu</span><strong>Basket total points</strong><div class="muted">Perte 15,00 € · Hier 22:14</div></div>
+      `;
+    }
+
+    function showResult(type, stake, winAmount) {
+      const isWin = type === 'win';
+      document.getElementById('modalContent').innerHTML = `
+        <div class="symbol ${isWin ? 'win' : 'lost'}">${isWin ? '✓' : '×'}</div>
+        <h2>${isWin ? 'Ticket gagnant' : 'Ticket perdant'}</h2>
+        <p class="muted">${isWin ? `Gain crédité : ${money(winAmount)}.` : `La mise de ${money(stake)} n’a pas été récupérée.`}</p>
+        <button class="yellow-btn" onclick="hideModal(); go('${isWin ? 'tickets' : 'account'}')">${isWin ? 'Voir mes tickets' : 'Voir mon solde'}</button>
+        <button class="ghost-btn" onclick="hideModal()">Fermer</button>
+      `;
+      document.getElementById('modal').classList.add('show');
+    }
+
+    function showEmptyBalance() {
+      document.getElementById('modalContent').innerHTML = `
+        <div class="symbol lost">!</div>
+        <h2>Solde indisponible</h2>
+        <p class="muted">Votre solde disponible est insuffisant pour valider ce ticket.</p>
+        <button class="yellow-btn" onclick="hideModal(); go('account')">Voir mon compte</button>
+        <button class="ghost-btn" onclick="hideModal()">Fermer</button>
+      `;
+      document.getElementById('modal').classList.add('show');
+    }
+
+    function updateUI() {
+      const wallet = document.getElementById('wallet');
+      wallet.textContent = money(balance);
+      wallet.classList.toggle('low', balance > 0 && balance < 60);
+      wallet.classList.toggle('empty', balance === 0);
+      document.getElementById('accountBalance').textContent = money(balance);
+      document.getElementById('accountBalance').style.color = balance < 60 ? 'var(--red)' : 'var(--yellow2)';
+      document.getElementById('totalStaked').textContent = money(totalStaked);
+      const net = totalWon - totalStaked;
+      const netEl = document.getElementById('netResult');
+      netEl.textContent = `${net >= 0 ? '+' : '-'}${money(Math.abs(net))}`;
+      netEl.style.color = net >= 0 ? 'var(--green)' : 'var(--red)';
+      const cashier = document.getElementById('cashierBalance');
+      if (cashier) cashier.textContent = money(balance);
+      if (balance === 0) document.getElementById('ticketStatus').textContent = 'Solde indisponible';
+    }
+
+    function resetDemo() {
+      balance = START_BALANCE;
+      totalStaked = 0;
+      totalWon = 0;
+      betCount = 0;
+      interactions = 0;
+      renderTicketsSeed();
+      updateUI();
+      updateSlip();
+      showToast('Compte mis à jour.');
+      go('account');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    function hideModal() { document.getElementById('modal').classList.remove('show'); }
+    function closeModal(e) { if (e.target.id === 'modal') hideModal(); }
+
+    renderAll();
+  </script>
+</body>
+</html>
