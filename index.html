@@ -356,6 +356,16 @@
 
     .hidden-admin { margin-top: 28px; opacity: .7; }
     .empty-state { text-align: center; color: var(--muted); padding: 26px 10px; }
+    .amount-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 12px 0; }
+    .amount-btn { border: 1px solid var(--line); background: var(--panel2); color: var(--text); border-radius: 17px; padding: 16px 10px; font-size: 18px; font-weight: 950; }
+    .amount-btn.active { background: linear-gradient(180deg, var(--yellow2), var(--yellow)); color: #151000; border-color: transparent; }
+    .input-like { width: 100%; border: 1px solid var(--line); background: #081511; color: var(--text); border-radius: 16px; padding: 14px; font-size: 18px; font-weight: 850; outline: none; }
+    .input-like::placeholder { color: #60756c; }
+    .card-chip { border: 1px solid rgba(255,255,255,.1); background: linear-gradient(135deg, #243b33, #0d1814); border-radius: 22px; padding: 16px; margin-bottom: 12px; min-height: 118px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
+    .card-chip .number { letter-spacing: 2px; font-size: 18px; font-weight: 900; }
+    .card-chip .card-row { display: flex; justify-content: space-between; align-items: end; color: var(--muted); font-size: 12px; }
+    .confirm-modal .modal-card { min-height: 52vh; }
+    .big-bet-btn { width: 100%; border: 0; border-radius: 24px; padding: 22px 16px; margin-top: 18px; background: linear-gradient(180deg, var(--yellow2), var(--yellow)); color: #151000; font-size: 26px; font-weight: 1000; box-shadow: 0 18px 42px rgba(216,156,18,.22); }
   </style>
 </head>
 <body>
@@ -420,6 +430,7 @@
         <div class="card list-row"><div><strong>Solde disponible</strong><div class="muted">Mise à jour instantanée</div></div><strong id="accountBalance" style="color:var(--yellow2)">352,40 €</strong></div>
         <div class="card list-row"><div><strong>Total misé aujourd'hui</strong><div class="muted">Tickets validés</div></div><strong id="totalStaked">0,00 €</strong></div>
         <div class="card list-row"><div><strong>Résultat net</strong><div class="muted">Gains moins mises</div></div><strong id="netResult" style="color:var(--red)">0,00 €</strong></div>
+        <div class="card list-row" onclick="go('deposit')"><div class="icon">＋</div><div class="grow"><strong>Ajouter des fonds</strong><div class="muted">Carte enregistrée, crédit instantané</div></div><span class="arrow">›</span></div>
         <div class="card list-row" onclick="go('cashier')"><div class="icon">💳</div><div class="grow"><strong>Caisse</strong><div class="muted">Dépôts, retraits, transactions</div></div><span class="arrow">›</span></div>
         <div class="card list-row" onclick="go('settings')"><div class="icon">⚙</div><div class="grow"><strong>Réglages</strong><div class="muted">Sécurité, notifications, limites</div></div><span class="arrow">›</span></div>
       </main>
@@ -453,6 +464,7 @@
     let betCount = 0;
     let interactions = 0;
     let selected = { team: 'Paris Nord gagne', odd: 1.82, sport: 'Football', market: 'Résultat du match' };
+    let depositAmount = 20;
 
     const sports = [
       { id:'sport-foot', icon:'⚽', name:'Football', desc:'Ligue Hexa, coupes, live', matches:[['Paris Nord','Madrid Sud','21:00',1.82,3.40,4.10],['Olympique Azur','Racing Ouest','20:30',2.05,3.10,3.75],['United Est','Club Atlantique','22:00',1.48,3.80,4.80]] },
@@ -474,7 +486,8 @@
       { id:'limits', icon:'🛑', name:'Limites', desc:'Plafonds et contrôle', matches:[] },
       { id:'history', icon:'↺', name:'Historique', desc:'Activité récente', matches:[] },
       { id:'cashier', icon:'💳', name:'Caisse', desc:'Transactions', matches:[] },
-      { id:'settings', icon:'⚙', name:'Réglages', desc:'Sécurité et préférences', matches:[] }
+      { id:'settings', icon:'⚙', name:'Réglages', desc:'Sécurité et préférences', matches:[] },
+      { id:'deposit', icon:'＋', name:'Ajouter des fonds', desc:'Carte enregistrée', matches:[] }
     ];
 
     const scriptedResults = ['win','lost','lost','lost','win','lost','lost','lost','lost','lost'];
@@ -513,6 +526,7 @@
 
     function renderSportPage(s) {
       if (s.id === 'settings') return renderSettingsPage(s);
+      if (s.id === 'deposit') return renderDepositPage(s);
       if (s.id === 'cashier') return renderCashierPage(s);
       if (s.id === 'history') return renderHistoryPage(s);
       if (s.id === 'limits') return renderLimitsPage(s);
@@ -523,6 +537,37 @@
           <div class="row-title"><h2>${s.icon} ${s.name}</h2><span>${s.desc}</span></div>
           <div class="pill-row"><button class="pill active">Tous</button><button class="pill">Live</button><button class="pill">Populaires</button><button class="pill">Demain</button></div>
           ${content}
+        </main>
+      `;
+    }
+
+    function renderDepositPage(s) {
+      return `
+        <main id="${s.id}" class="screen">
+          <button class="ghost-btn" onclick="go('account')">← Retour compte</button>
+          <div class="row-title"><h2>＋ Ajouter des fonds</h2><span>Carte enregistrée</span></div>
+          <div class="card-chip">
+            <div class="card-row"><strong>Carte bancaire</strong><span>VISA</span></div>
+            <div class="number">•••• •••• •••• 4829</div>
+            <div class="card-row"><span>ALEX M.</span><span>Expire 09/28</span></div>
+          </div>
+          <div class="card">
+            <span class="tag">Montant</span>
+            <div class="amount-grid">
+              <button class="amount-btn" onclick="setDepositAmount(10, this)">10 €</button>
+              <button class="amount-btn active" onclick="setDepositAmount(20, this)">20 €</button>
+              <button class="amount-btn" onclick="setDepositAmount(50, this)">50 €</button>
+              <button class="amount-btn" onclick="setDepositAmount(100, this)">100 €</button>
+            </div>
+            <label class="muted">Montant manuel</label>
+            <input id="manualAmount" class="input-like" inputmode="decimal" placeholder="Autre montant" oninput="setManualAmount(this.value)" />
+          </div>
+          <div class="card">
+            <span class="tag">Sécurité</span>
+            <div class="muted" style="margin-bottom:8px">Saisissez le cryptogramme de la carte enregistrée.</div>
+            <input id="cvvInput" class="input-like" inputmode="numeric" maxlength="3" placeholder="CVV" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)" />
+            <button class="yellow-btn" onclick="openDepositConfirm()">Créditer mon compte</button>
+          </div>
         </main>
       `;
     }
@@ -615,6 +660,13 @@
     function confirmBet() {
       const stake = currentStake();
       if (stake <= 0) { showEmptyBalance(); return; }
+      showBetConfirm(stake);
+    }
+
+    function placeBetAfterConfirm() {
+      hideModal();
+      const stake = currentStake();
+      if (stake <= 0) { showEmptyBalance(); return; }
       betCount++;
       totalStaked += stake;
       balance = Math.max(0, balance - stake);
@@ -641,6 +693,18 @@
         showResult('lost', stake, 0);
       }
       updateSlip();
+    }
+
+    function showBetConfirm(stake) {
+      document.getElementById('modal').classList.add('show', 'confirm-modal');
+      document.getElementById('modalContent').innerHTML = `
+        <div class="symbol pending">◆</div>
+        <h2>Confirmer le pari</h2>
+        <p class="muted">${selected.team}<br>${selected.sport} · Cote ${selected.odd.toFixed(2)} · Mise ${money(stake)}</p>
+        <div class="field" style="margin-top:14px"><label>Gain potentiel</label><strong>${money(stake * selected.odd)}</strong></div>
+        <button class="big-bet-btn" onclick="placeBetAfterConfirm()">Je parie</button>
+        <button class="ghost-btn" onclick="hideModal()">Annuler</button>
+      `;
     }
 
     function addTicket(status, stake, winAmount) {
@@ -709,6 +773,49 @@
       if (balance === 0) document.getElementById('ticketStatus').textContent = 'Solde indisponible';
     }
 
+    function setDepositAmount(amount, el) {
+      depositAmount = amount;
+      document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+      if (el) el.classList.add('active');
+      const manual = document.getElementById('manualAmount');
+      if (manual) manual.value = '';
+    }
+
+    function setManualAmount(value) {
+      const normalized = String(value).replace(',', '.').replace(/[^0-9.]/g, '');
+      const parsed = parseFloat(normalized);
+      if (!isNaN(parsed) && parsed > 0) depositAmount = Math.min(parsed, 500);
+      document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function openDepositConfirm() {
+      const cvv = document.getElementById('cvvInput')?.value || '';
+      if (cvv.length !== 3) { showToast('Code de sécurité incomplet.'); return; }
+      document.getElementById('modal').classList.add('show');
+      document.getElementById('modalContent').innerHTML = `
+        <div class="symbol pending">＋</div>
+        <h2>Confirmer le dépôt</h2>
+        <p class="muted">Carte •••• 4829<br>Montant à créditer : ${money(depositAmount)}</p>
+        <button class="yellow-btn" onclick="confirmDeposit()">Valider le paiement</button>
+        <button class="ghost-btn" onclick="hideModal()">Annuler</button>
+      `;
+    }
+
+    function confirmDeposit() {
+      balance = Math.min(999.99, balance + depositAmount);
+      updateUI();
+      hideModal();
+      addDepositHistory(depositAmount);
+      showToast(`Compte crédité de ${money(depositAmount)}.`);
+      go('account');
+    }
+
+    function addDepositHistory(amount) {
+      const list = document.getElementById('ticketsList');
+      if (!list) return;
+      list.insertAdjacentHTML('afterbegin', `<div class="ticket win"><span class="tag green">Dépôt</span><strong>Carte •••• 4829</strong><div class="muted">Compte crédité de ${money(amount)}</div></div>`);
+    }
+
     function resetDemo() {
       balance = START_BALANCE;
       totalStaked = 0;
@@ -729,7 +836,7 @@
       setTimeout(() => toast.classList.remove('show'), 2600);
     }
 
-    function hideModal() { document.getElementById('modal').classList.remove('show'); }
+    function hideModal() { document.getElementById('modal').classList.remove('show', 'confirm-modal'); }
     function closeModal(e) { if (e.target.id === 'modal') hideModal(); }
 
     renderAll();
