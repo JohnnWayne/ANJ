@@ -625,12 +625,13 @@
     function safe(str) { return String(str).replace(/'/g, "\\'"); }
 
     function go(id) {
+      if(id==='slip') document.getElementById('slipFloat').classList.remove('show');
       document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
       const roots = ['home','sports','tickets','slip','account'];
       document.querySelectorAll('.bottom-nav button').forEach((btn, i) => btn.classList.toggle('active', roots[i] === id));
       interactions++;
       if (interactions === 6) showToast('Résultat disponible : un ticket vient d’être mis à jour.');
-      document.getElementById('slipFloat').classList.toggle('show', !!selected && !['slip','tickets','account'].includes(id));
+      document.getElementById('slipFloat').classList.remove('show');
     }
 
     function selectOdd(el, team, odd, sport, market) {
@@ -638,7 +639,7 @@
       el.classList.add('selected');
       selected = { team, odd, sport, market };
       updateSlip();
-      document.getElementById('slipFloat').classList.add('show');
+      document.getElementById('slipFloat').classList.add('show'); setTimeout(() => { if(!document.getElementById('slip').classList.contains('active')) document.getElementById('slipFloat').classList.remove('show'); }, 3500);
       interactions++;
     }
 
@@ -658,6 +659,7 @@
     }
 
     function confirmBet() {
+      document.getElementById('slipFloat').classList.remove('show');
       const stake = currentStake();
       if (stake <= 0) { showEmptyBalance(); return; }
       showBetConfirm(stake);
