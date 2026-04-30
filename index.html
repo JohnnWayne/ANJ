@@ -500,7 +500,8 @@
         <div class="row-title"><h2>Ticket de pari</h2><span id="slipLabel">1 sélection</span></div>
         <div class="card">
           <span class="tag">Sélection</span>
-          <h2 id="pickName" st<div class="field"><label>Mise</label><input id="stakeInput" class="stake-input" inputmode="decimal" value="35" oninput="updateStakeFromInput(this.value)" /></div>ed">Football · Résultat du match</div>
+          <h2 id="pickName" style="margin:0 0 6px">Paris Nord gagne</h2>
+          <div id="pickMeta" class="muted">Football · Résultat du match</div>
           <div class="grid2">
             <div class="field"><label>Cote</label><strong id="pickOdd">1.82</strong></div>
             <div class="field"><label>Mise</label><input id="stakeInput" class="stake-input" inputmode="decimal" value="35" oninput="updateStakeFromInput(this.value)" /></div>
@@ -553,12 +554,12 @@
     let totalWon = 0;
     let betCount = 0;
     let interactions = 0;
-    let selected = { team: 'Par82, sport: 'Football', market: 'Résultat du match' };
+    let selected = { team: 'Paris Nord gagne', odd: 1.82, sport: 'Football', market: 'Résultat du match' };
     let depositAmount = 20;
     let customStake = DEFAULT_STAKE;
     let pendingResult = null;
     let resultReady = false;
-    let ticketsVisitedSinceBet = true;
+    let canShowTicketResult = false;
 
     const sports = [
       { id:'sport-foot', icon:'⚽', name:'Football', desc:'Ligue Hexa, coupes, live', matches:[['Paris Nord','Madrid Sud','21:00',1.82,3.40,4.10],['Olympique Azur','Racing Ouest','20:30',2.05,3.10,3.75],['United Est','Club Atlantique','22:00',1.48,3.80,4.80]] },
@@ -585,9 +586,9 @@
     ];
 
     const scriptedResults = ['win','lost','lost','lost','win','lost','lost','lost','lost','lost'];
-    const extraLosses = [0, 18.40, 24.00, 42.60, 0, 36.00, 48.00, 55.00, 58.00, 70.00];
 
-    function money(v) { return `${Math.max(0, v).toFixed(2).replace('.', ',')} €`; }
+    function money(v) { return `${Math.max(0, Number(v) || 0).toFixed(2).replace('.', ',')} €`; }
+    function safe(str) { return String(str).replace(/'/g, "\\'"); }
 
     function renderAll() {
       document.getElementById('featuredMatches').innerHTML = sports[0].matches.map((m, i) => renderMatch(m, 'Football', `foot_0${i + 2}.jpg`)).join('');
@@ -641,11 +642,7 @@
         <main id="${s.id}" class="screen">
           <button class="ghost-btn" onclick="go('account')">← Retour compte</button>
           <div class="row-title"><h2>＋ Ajouter des fonds</h2><span>Carte enregistrée</span></div>
-          <div class="card-chip">
-            <div class="card-row"><strong>Carte bancaire</strong><span>VISA</span></div>
-            <div class="number">•••• •••• •••• 4829</div>
-            <div class="card-row"><span>ALEX M.</span><span>Expire 09/28</span></div>
-          </div>
+          <div class="card-chip"><div class="card-row"><strong>Carte bancaire</strong><span>VISA</span></div><div class="number">•••• •••• •••• 4829</div><div class="card-row"><span>ALEX M.</span><span>Expire 09/28</span></div></div>
           <div class="card">
             <span class="tag">Montant</span>
             <div class="amount-grid">
@@ -660,7 +657,7 @@
           <div class="card">
             <span class="tag">Sécurité</span>
             <div class="muted" style="margin-bottom:8px">Saisissez le cryptogramme de la carte enregistrée.</div>
-            <input id="cvvInput" class="input-like" inputmode="numeric" maxlength="3" placeholder="CVV" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)" />
+            <input id="cvvInput" class="input-like" inputmode="numeric" maxlength="3" placeholder="CVV" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,3)" />
             <button class="yellow-btn" onclick="openDepositConfirm()">Créditer mon compte</button>
           </div>
         </main>
@@ -680,25 +677,11 @@
     }
 
     function renderHistoryPage(s) {
-      return `
-        <main id="${s.id}" class="screen">
-          <button class="ghost-btn" onclick="go('sports')">← Retour sports</button>
-          <div class="row-title"><h2>↺ Historique</h2><span>Activité</span></div>
-          <div id="historyList"><div class="empty-state">Vos dernières opérations apparaîtront ici.</div></div>
-        </main>
-      `;
+      return `<main id="${s.id}" class="screen"><button class="ghost-btn" onclick="go('sports')">← Retour sports</button><div class="row-title"><h2>↺ Historique</h2><span>Activité</span></div><div id="historyList"><div class="empty-state">Vos dernières opérations apparaîtront ici.</div></div></main>`;
     }
 
     function renderLimitsPage(s) {
-      return `
-        <main id="${s.id}" class="screen">
-          <button class="ghost-btn" onclick="go('sports')">← Retour sports</button>
-          <div class="row-title"><h2>🛑 Limites</h2><span>Contrôle</span></div>
-          <div class="card list-row"><div><strong>Plafond journalier</strong><div class="muted">350,00 € maximum</div></div><span class="arrow">›</span></div>
-          <div class="card list-row"><div><strong>Temps d’activité</strong><div class="muted">Alerte après 30 minutes</div></div><span class="arrow">›</span></div>
-          <div class="notice">Vous pouvez définir des limites pour garder le contrôle de votre activité.</div>
-        </main>
-      `;
+      return `<main id="${s.id}" class="screen"><button class="ghost-btn" onclick="go('sports')">← Retour sports</button><div class="row-title"><h2>🛑 Limites</h2><span>Contrôle</span></div><div class="card list-row"><div><strong>Plafond journalier</strong><div class="muted">350,00 € maximum</div></div><span class="arrow">›</span></div><div class="card list-row"><div><strong>Temps d’activité</strong><div class="muted">Alerte après 30 minutes</div></div><span class="arrow">›</span></div><div class="notice">Vous pouvez définir des limites pour garder le contrôle de votre activité.</div></main>`;
     }
 
     function renderSettingsPage(s) {
@@ -709,40 +692,61 @@
           <div class="card list-row"><div class="icon">🔔</div><div class="grow"><strong>Notifications</strong><div class="muted">Résultats, cotes, alertes</div></div><span class="arrow">›</span></div>
           <div class="card list-row"><div class="icon">🔐</div><div class="grow"><strong>Sécurité</strong><div class="muted">Connexion et validation</div></div><span class="arrow">›</span></div>
           <div class="card list-row" onclick="go('limits')"><div class="icon">🛑</div><div class="grow"><strong>Limites de jeu</strong><div class="muted">Plafonds, pauses, activité</div></div><span class="arrow">›</span></div>
-          <div class="hidden-admin">
-            <div class="row-title"><h2 style="font-size:14px">Zone compte</h2><span>Avancé</span></div>
-            <button class="danger-btn" onclick="resetDemo()">Supprimer mon compte</button>
-          </div>
+          <div class="hidden-admin"><div class="row-title"><h2 style="font-size:14px">Zone compte</h2><span>Avancé</span></div><button class="danger-btn" onclick="resetDemo()">Supprimer mon compte</button></div>
         </main>
       `;
     }
 
-    function saesultReady && balance > 0 && ticketsVisitedSinceBet === false) {
+    function go(id) {
+      document.getElementById('slipFloat').classList.remove('show');
+      document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+      const roots = ['home','sports','tickets','slip','account'];
+      document.querySelectorAll('.bottom-nav button').forEach((btn, i) => btn.classList.toggle('active', roots[i] === id));
+      interactions++;
+
+      if (id === 'tickets' && pendingResult && resultReady && canShowTicketResult && balance > 0) {
         showResult(pendingResult.type, pendingResult.stake, pendingResult.winAmount);
-        ticketsVisitedSinceBet = true;
+        canShowTicketResult = false;
       }
-      if (id !== 'tickets' && pendingResult && resultReady) ticketsVisitedSinceBet = false;
+      if (id !== 'tickets' && pendingResult && resultReady) {
+        canShowTicketResult = true;
+      }
     }
 
     function selectOdd(el, team, odd, sport, market) {
       document.querySelectorAll('.odd').forEach(o => o.classList.remove('selected'));
       el.classList.add('selected');
-      selected = { team, odd,ntByIdotentialWin').textContent = money(currentStake() * selected.odd);
-      document.getElementById('floatPick').textContent = `${selected.team.length > 17 ? selected.team.slice(0,17) + '…' : selected.team} · ${selected.odd.toFixed(2)}`;
+      selected = { team, odd, sport, market };
+      updateSlip(false);
+      document.getElementById('slipFloat').classList.add('show');
+      setTimeout(() => {
+        if(!document.getElementById('slip').classList.contains('active')) document.getElementById('slipFloat').classList.remove('show');
+      }, 3500);
+      interactions++;
     }
 
     function currentStake() {
       if (balance <= 0) return 0;
-      const parsed = Number(customStake);
+      const parsed = parseFloat(String(customStake).replace(',', '.'));
       const wanted = !isNaN(parsed) && parsed > 0 ? parsed : DEFAULT_STAKE;
       return Math.min(balance, wanted);
     }
 
     function updateStakeFromInput(value) {
-      const normalized = String(value).replace(',', '.').replace(/[^0-9.]/g, '');
-      const parsed = parseFloat(normalized);
+      const clean = String(value).replace(',', '.').replace(/[^0-9.]/g, '');
+      const parsed = parseFloat(clean);
       customStake = !isNaN(parsed) && parsed > 0 ? parsed : DEFAULT_STAKE;
       updateSlip(false);
+    }
+
+    function updateSlip(syncInput = true) {
+      document.getElementById('pickName').textContent = selected.team;
+      document.getElementById('pickMeta').textContent = `${selected.sport} · ${selected.market}`;
+      document.getElementById('pickOdd').textContent = selected.odd.toFixed(2);
+      const stakeInput = document.getElementById('stakeInput');
+      if (stakeInput && syncInput) stakeInput.value = String(currentStake()).replace('.', ',');
+      document.getElementById('potentialWin').textContent = money(currentStake() * selected.odd);
+      document.getElementById('floatPick').textContent = `${selected.team.length > 17 ? selected.team.slice(0,17) + '…' : selected.team} · ${selected.odd.toFixed(2)}`;
     }
 
     function confirmBet() {
@@ -752,30 +756,43 @@
       showBetConfirm(stake);
     }
 
+    function showBetConfirm(stake) {
+      document.getElementById('modal').classList.add('show', 'confirm-modal');
+      document.getElementById('modalContent').innerHTML = `
+        <div class="symbol pending">◆</div>
+        <h2>Confirmer le pari</h2>
+        <p class="muted">${selected.team}<br>${selected.sport} · Cote ${selected.odd.toFixed(2)} · Mise ${money(stake)}</p>
+        <div class="field" style="margin-top:14px"><label>Gain potentiel</label><strong>${money(stake * selected.odd)}</strong></div>
+        <button class="big-bet-btn" onclick="placeBetAfterConfirm()">Je parie</button>
+        <button class="ghost-btn" onclick="hideModal()">Annuler</button>
+      `;
+    }
+
     function placeBetAfterConfirm() {
       hideModal();
       const stake = currentStake();
       if (stake <= 0) { showEmptyBalance(); return; }
+
       betCount++;
       totalStaked += stake;
       balance = Math.max(0, balance - stake);
       const outcome = scriptedResults[Math.min(betCount - 1, scriptedResults.length - 1)];
-      updateUI();
 
       if (outcome === 'win') {
         const winAmount = Math.round(stake * selected.odd * 100) / 100;
         totalWon += winAmount;
-        balance = balance + winAmount;
-        updateUI();
+        balance += winAmount;
         addTicket('win', stake, winAmount);
         pendingResult = { type: 'win', stake, winAmount };
       } else {
         addTicket('lost', stake, 0);
         pendingResult = { type: 'lost', stake, winAmount: 0 };
       }
+
       resultReady = true;
-      ticketsVisitedSinceBet = false;
-      updateSlip();
+      canShowTicketResult = true;
+      updateUI();
+      updateSlip(false);
       showBetValidated();
     }
 
@@ -789,8 +806,14 @@
       document.getElementById('modal').classList.add('show');
     }
 
-    function showBetConfirm(stake) {
- odd.toFixed(2)} · Mise ${money(stake)}</div>
+    function addTicket(status, stake, winAmount) {
+      const list = document.getElementById('ticketsList');
+      const isWin = status === 'win';
+      const html = `
+        <div class="ticket ${isWin ? 'win' : 'lost'}">
+          <span class="tag ${isWin ? 'green' : 'red'}">${isWin ? 'Gagné' : 'Perdu'}</span>
+          <strong>${selected.team}</strong>
+          <div class="muted">${selected.sport} · Cote ${selected.odd.toFixed(2)} · Mise ${money(stake)}</div>
           <div class="grid2">
             <div class="field"><label>${isWin ? 'Gain' : 'Perte'}</label><strong style="color:${isWin ? 'var(--green)' : 'var(--red)'}">${isWin ? '+' : '-'}${money(isWin ? winAmount : stake)}</strong></div>
             <div class="field"><label>Solde</label><strong>${money(balance)}</strong></div>
@@ -804,7 +827,7 @@
     function renderTicketsSeed() {
       document.getElementById('ticketsList').innerHTML = `
         <div class="ticket pending"><span class="tag">En cours</span><strong>Combiné football</strong><div class="muted">3 sélections · Gain potentiel 68,64 €</div></div>
-        <div class="ticket wé</span><strong>Tennis live</strong><div class="muted">L. Moreau vainqueur · Gain 30,80 €</div></div>
+        <div class="ticket win"><span class="tag green">Gagné</span><strong>Tennis live</strong><div class="muted">L. Moreau vainqueur · Gain 30,80 €</div></div>
         <div class="ticket lost"><span class="tag red">Perdu</span><strong>Basket total points</strong><div class="muted">Perte 15,00 € · Hier 22:14</div></div>
       `;
     }
@@ -815,8 +838,7 @@
         <div class="symbol ${isWin ? 'win' : 'lost'}">${isWin ? '✓' : '×'}</div>
         <h2>${isWin ? 'Ticket gagnant' : 'Ticket perdant'}</h2>
         <p class="muted">${isWin ? `Gain crédité : ${money(winAmount)}.` : `La mise de ${money(stake)} n’a pas été récupérée.`}</p>
-        <button class="yellow-btn" onclick="hideModal(); go('${isWin ? 'tickets' : 'account'}')">${isWin ? 'Voir mes tickets' : 'Voir mon solde'}</button>
-        <button class="ghost-btn" onclick="hideModal()">Fermer</button>
+        <button class="yellow-btn" onclick="hideModal()">Fermer</button>
       `;
       document.getElementById('modal').classList.add('show');
     }
@@ -860,7 +882,7 @@
     function setManualAmount(value) {
       const normalized = String(value).replace(',', '.').replace(/[^0-9.]/g, '');
       const parsed = parseFloat(normalized);
-      if (!isNaN(parsed) && parsed > 0) depositAmount = Math.min(parsed, 500);
+      if (!isNaN(parsed) && parsed > 0) depositAmount = parsed;
       document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('active'));
     }
 
@@ -878,7 +900,7 @@
     }
 
     function confirmDeposit() {
-      balance = balance + depositAmount;
+      balance += depositAmount;
       updateUI();
       hideModal();
       addDepositHistory(depositAmount);
@@ -901,7 +923,7 @@
       customStake = DEFAULT_STAKE;
       pendingResult = null;
       resultReady = false;
-      ticketsVisitedSinceBet = true;
+      canShowTicketResult = false;
       renderTicketsSeed();
       updateUI();
       updateSlip();
