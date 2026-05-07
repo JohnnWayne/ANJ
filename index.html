@@ -560,6 +560,7 @@
     let pendingResult = null;
     let resultReady = false;
     let canShowTicketResult = false;
+    let resultToSettle = null;
 
     const sports = [
       { id:'sport-foot', icon:'⚽', name:'Football', desc:'Ligue Hexa, coupes, live', matches:[['Paris Nord','Madrid Sud','21:00',1.82,3.40,4.10],['Olympique Azur','Racing Ouest','20:30',2.05,3.10,3.75],['United Est','Club Atlantique','22:00',1.48,3.80,4.80]] },
@@ -588,7 +589,7 @@
     const scriptedResults = ['win','lost','lost','lost','win','lost','lost','lost','lost','lost'];
 
     function money(v) { return `${Math.max(0, Number(v) || 0).toFixed(2).replace('.', ',')} €`; }
-    function safe(str) { return String(str).replace(/'/g, "\\'"); }
+    function safe(str) { return String(str).replace(/'/g, "\'"); }
 
     function renderAll() {
       document.getElementById('featuredMatches').innerHTML = sports[0].matches.map((m, i) => renderMatch(m, 'Football', `foot_0${i + 2}.jpg`)).join('');
@@ -657,7 +658,7 @@
           <div class="card">
             <span class="tag">Sécurité</span>
             <div class="muted" style="margin-bottom:8px">Saisissez le cryptogramme de la carte enregistrée.</div>
-            <input id="cvvInput" class="input-like" inputmode="numeric" maxlength="3" placeholder="CVV" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,3)" />
+            <input id="cvvInput" class="input-like" inputmode="numeric" maxlength="3" placeholder="CVV" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)" />
             <button class="yellow-btn" onclick="openDepositConfirm()">Créditer mon compte</button>
           </div>
         </main>
@@ -704,13 +705,7 @@
       document.querySelectorAll('.bottom-nav button').forEach((btn, i) => btn.classList.toggle('active', roots[i] === id));
       interactions++;
 
-      if (id === 'tickets' && pendingResult && resultReady && canShowTicketResult && balance > 0) {
-        showResult(pendingResult.type, pendingResult.stake, pendingResult.winAmount);
-        canShowTicketResult = false;
-      }
-      if (id !== 'tickets' && pendingResult && resultReady) {
-        canShowTicketResult = true;
-      }
+      // Résultat affiché uniquement via le bouton “Voir le résultat” dans l’onglet Tickets.
     }
 
     function selectOdd(el, team, odd, sport, market) {
@@ -774,24 +769,19 @@
       if (stake <= 0) { showEmptyBalance(); return; }
 
       betCount++;
-      totalStaked += stake;
-      balance = Math.max(0, balance - stake);
       const outcome = scriptedResults[Math.min(betCount - 1, scriptedResults.length - 1)];
 
       if (outcome === 'win') {
         const winAmount = Math.round(stake * selected.odd * 100) / 100;
-        totalWon += winAmount;
-        balance += winAmount;
         addTicket('win', stake, winAmount);
-        pendingResult = { type: 'win', stake, winAmount };
+        pendingResult = { type: 'win', stake, winAmount, settled: false };
       } else {
         addTicket('lost', stake, 0);
-        pendingResult = { type: 'lost', stake, winAmount: 0 };
+        pendingResult = { type: 'lost', stake, winAmount: 0, settled: false };
       }
 
       resultReady = true;
       canShowTicketResult = true;
-      updateUI();
       updateSlip(false);
       showBetValidated();
     }
@@ -818,6 +808,7 @@
             <div class="field"><label>${isWin ? 'Gain' : 'Perte'}</label><strong style="color:${isWin ? 'var(--green)' : 'var(--red)'}">${isWin ? '+' : '-'}${money(isWin ? winAmount : stake)}</strong></div>
             <div class="field"><label>Solde</label><strong>${money(balance)}</strong></div>
           </div>
+          <button class="yellow-btn" onclick="showResult('${isWin ? 'win' : 'lost'}', ${stake}, ${winAmount})">Voir le résultat</button>
         </div>
       `;
       list.insertAdjacentHTML('afterbegin', html);
@@ -826,21 +817,40 @@
 
     function renderTicketsSeed() {
       document.getElementById('ticketsList').innerHTML = `
-        <div class="ticket pending"><span class="tag">En cours</span><strong>Combiné football</strong><div class="muted">3 sélections · Gain potentiel 68,64 €</div></div>
-        <div class="ticket win"><span class="tag green">Gagné</span><strong>Tennis live</strong><div class="muted">L. Moreau vainqueur · Gain 30,80 €</div></div>
-        <div class="ticket lost"><span class="tag red">Perdu</span><strong>Basket total points</strong><div class="muted">Perte 15,00 € · Hier 22:14</div></div>
+        <div class="ticket pending"><span class="tag">En cours</span><strong>Combiné football</strong><div class="muted">3 sélections · Gain potentiel 68,64 €</div><button class="yellow-btn" onclick="showResult('lost', 35, 0)">Voir le résultat</button></div>
+        <div class="ticket win"><span class="tag green">Gagné</span><strong>Tennis live</strong><div class="muted">L. Moreau vainqueur · Gain 30,80 €</div><button class="ghost-btn" onclick="showResult('win', 20, 30.80)">Voir le résultat</button></div>
+        <div class="ticket lost"><span class="tag red">Perdu</span><strong>Basket total points</strong><div class="muted">Perte 15,00 € · Hier 22:14</div><button class="ghost-btn" onclick="showResult('lost', 15, 0)">Voir le résultat</button></div>
       `;
     }
 
     function showResult(type, stake, winAmount) {
       const isWin = type === 'win';
+      resultToSettle = { type, stake, winAmount, settled: false };
       document.getElementById('modalContent').innerHTML = `
         <div class="symbol ${isWin ? 'win' : 'lost'}">${isWin ? '✓' : '×'}</div>
         <h2>${isWin ? 'Ticket gagnant' : 'Ticket perdant'}</h2>
         <p class="muted">${isWin ? `Gain crédité : ${money(winAmount)}.` : `La mise de ${money(stake)} n’a pas été récupérée.`}</p>
-        <button class="yellow-btn" onclick="hideModal()">Fermer</button>
+        <button class="yellow-btn" onclick="closeResultAndSettle()">Fermer</button>
       `;
       document.getElementById('modal').classList.add('show');
+    }
+
+    function closeResultAndSettle() {
+      if (resultToSettle && !resultToSettle.settled) {
+        const { type, stake, winAmount } = resultToSettle;
+        if (type === 'win') {
+          totalWon += winAmount;
+          balance += winAmount;
+        } else {
+          totalStaked += stake;
+          balance = Math.max(0, balance - stake);
+        }
+        resultToSettle.settled = true;
+        if (pendingResult) pendingResult.settled = true;
+        updateUI();
+      }
+      resultToSettle = null;
+      hideModal();
     }
 
     function showEmptyBalance() {
@@ -924,6 +934,7 @@
       pendingResult = null;
       resultReady = false;
       canShowTicketResult = false;
+      resultToSettle = null;
       renderTicketsSeed();
       updateUI();
       updateSlip();
