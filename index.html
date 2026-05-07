@@ -769,6 +769,8 @@
       if (stake <= 0) { showEmptyBalance(); return; }
 
       betCount++;
+      totalStaked += stake;
+      balance = Math.max(0, balance - stake);
       const outcome = scriptedResults[Math.min(betCount - 1, scriptedResults.length - 1)];
 
       if (outcome === 'win') {
@@ -777,11 +779,12 @@
         pendingResult = { type: 'win', stake, winAmount, settled: false };
       } else {
         addTicket('lost', stake, 0);
-        pendingResult = { type: 'lost', stake, winAmount: 0, settled: false };
+        pendingResult = { type: 'lost', stake, winAmount: 0, settled: true };
       }
 
       resultReady = true;
       canShowTicketResult = true;
+      updateUI();
       updateSlip(false);
       showBetValidated();
     }
@@ -837,13 +840,10 @@
 
     function closeResultAndSettle() {
       if (resultToSettle && !resultToSettle.settled) {
-        const { type, stake, winAmount } = resultToSettle;
+        const { type, winAmount } = resultToSettle;
         if (type === 'win') {
           totalWon += winAmount;
           balance += winAmount;
-        } else {
-          totalStaked += stake;
-          balance = Math.max(0, balance - stake);
         }
         resultToSettle.settled = true;
         if (pendingResult) pendingResult.settled = true;
