@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#07110e" />
+  <title>VICTO Desktop</title>
+  <style>
+    :root {
+      --bg: #07110e;
+      --panel: #101f1a;
+      --panel2: #172b23;
+      --text: #f3fff8;
+      --muted: #9bb0a7;
+      --line: rgba(255,255,255,.08);
+      --yellow: #d89c12;
+      --yellow2: #f0bd37;
+      --green: #20d17b;
+      --red: #ff565f;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+    body { overflow: hidden; }
+
+    .desktop-app {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 260px 1fr 360px;
+      background: radial-gradient(circle at top right, rgba(216,156,18,.14), transparent 34%), linear-gradient(180deg, #0b1b16, #07110e 42%);
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(7,17,14,.94);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 1000; }
+    .brand-mark { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg,var(--yellow),var(--yellow2)); color: #151000; }
+
+    .nav { display: grid; gap: 8px; }
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      border-radius: 16px;
+      padding: 14px 14px;
+      font-size: 15px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+    .nav button.active, .nav button:hover { background: var(--panel2); color: var(--yellow2); }
+
+    .wallet-card { margin-top: auto; border: 1px solid var(--line); background: var(--panel); border-radius: 22px; padding: 16px; }
+    .wallet-card span { color: var(--muted); font-size: 12px; }
+    .wallet-card strong { display: block; margin-top: 6px; font-size: 28px; color: var(--yellow2); }
+
+    .main {
+      overflow-y: auto;
+      padding: 26px 30px 40px;
+    }
+
+    .top-hero {
+      min-height: 260px;
+      border-radius: 30px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      background: linear-gradient(180deg, rgba(0,0,0,.08), rgba(0,0,0,.78)), url('./promo_01.jpg') center center / cover no-repeat;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .tag { display: inline-flex; align-items: center; width: fit-content; border-radius: 999px; padding: 7px 12px; background: linear-gradient(180deg,var(--yellow2),var(--yellow)); color: #151000; font-size: 13px; font-weight: 1000; margin-bottom: 10px; }
+    .tag.red { background: rgba(255,86,95,.16); color: #ffd0d3; }
+    .tag.green { background: rgba(32,209,123,.16); color: #bcffd9; }
+    .top-hero h1 { margin: 0 0 8px; font-size: 46px; letter-spacing: -1.8px; line-height: .95; text-shadow: 0 8px 22px rgba(0,0,0,.45); }
+    .top-hero p { margin: 0; max-width: 520px; color: rgba(255,255,255,.88); font-size: 16px; }
+
+    .section-title { display: flex; align-items: end; justify-content: space-between; margin: 24px 0 14px; }
+    .section-title h2 { margin: 0; font-size: 22px; }
+    .section-title span { color: var(--muted); font-size: 13px; }
+
+    .promo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .promo-card { position: relative; min-height: 220px; border-radius: 26px; overflow: hidden; background: #111; cursor: pointer; border: 1px solid var(--line); }
+    .promo-card img { width: 100%; height: 100%; object-fit: cover; display: block; position: absolute; inset: 0; }
+    .promo-card .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; background: linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.78)); }
+    .promo-card h3 { margin: 0 0 6px; font-size: 26px; }
+    .promo-card p { margin: 0 0 12px; color: rgba(255,255,255,.82); }
+    .mini-cta { width: fit-content; background: linear-gradient(180deg,var(--yellow2),var(--yellow)); color: #151000; font-weight: 1000; border-radius: 999px; padding: 10px 14px; }
+
+    .match-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+    .card { border: 1px solid var(--line); background: rgba(16,31,26,.96); border-radius: 24px; padding: 16px; }
+    .match-image { height: 150px; margin: -16px -16px 14px; border-radius: 24px 24px 16px 16px; overflow: hidden; background: #111; }
+    .match-image img { width: 100%; height: 100%; object-fit: cover; object-position: center 24%; display: block; }
+    .match-head { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+    .teams { display: grid; grid-template-columns: 1fr 48px 1fr; gap: 10px; align-items: center; font-weight: 1000; }
+    .teams .team:last-child { text-align: right; }
+    .score { text-align: center; color: var(--yellow2); font-size: 12px; }
+    .odds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 14px; }
+    .odd { border: 1px solid rgba(255,255,255,.07); background: var(--panel2); color: var(--text); border-radius: 15px; padding: 12px 8px; text-align: center; font-weight: 1000; cursor: pointer; }
+    .odd small { display: block; color: var(--muted); font-size: 10px; margin-bottom: 3px; }
+    .odd.selected { background: linear-gradient(180deg,var(--yellow2),var(--yellow)); color: #151000; }
+    .odd.selected small { color: #493200; }
+
+    .right-panel {
+      border-left: 1px solid var(--line);
+      background: rgba(7,17,14,.94);
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; animation: fade .14s ease-out; }
+    @keyframes fade { from { opacity: .6; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .list { display: grid; gap: 10px; }
+    .list-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--line); background: var(--panel); border-radius: 18px; padding: 14px; cursor: pointer; }
+    .icon { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; background: var(--panel2); font-size: 20px; }
+    .muted { color: var(--muted); font-size: 13px; line-height: 1.35; }
+
+    .field { border: 1px solid var(--line); background: #081511; border-radius: 18px; padding: 14px; margin-top: 10px; }
+    .field label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 5px; }
+    .field strong { font-size: 24px; }
+    .stake-input, .input-like { width: 100%; border: 0; outline: 0; background: transparent; color: var(--text); font-size: 24px; font-weight: 1000; }
+    .input-like { border: 1px solid var(--line); background: #081511; border-radius: 16px; padding: 14px; margin-top: 8px; }
+
+    .yellow-btn, .ghost-btn, .danger-btn { width: 100%; border: 0; border-radius: 17px; padding: 14px; margin-top: 12px; font-weight: 1000; font-size: 15px; cursor: pointer; }
+    .yellow-btn { background: linear-gradient(180deg,var(--yellow2),var(--yellow)); color: #151000; }
+    .ghost-btn { background: var(--panel2); color: var(--text); border: 1px solid var(--line); }
+    .danger-btn { background: rgba(255,86,95,.12); color: #ffd4d6; border: 1px solid rgba(255,86,95,.28); }
+
+    .ticket { border: 1px dashed rgba(255,255,255,.16); background: var(--panel); border-radius: 22px; padding: 15px; margin-bottom: 12px; }
+    .ticket.win { border-color: rgba(32,209,123,.45); }
+    .ticket.lost { border-color: rgba(255,86,95,.55); background: rgba(255,86,95,.055); }
+
+    .amount-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 12px 0; }
+    .amount-btn { border: 1px solid var(--line); background: var(--panel2); color: var(--text); border-radius: 16px; padding: 16px; font-size: 18px; font-weight: 1000; cursor: pointer; }
+    .amount-btn.active { background: linear-gradient(180deg,var(--yellow2),var(--yellow)); color: #151000; }
+    .card-chip { border: 1px solid rgba(255,255,255,.1); background: linear-gradient(135deg,#243b33,#0d1814); border-radius: 24px; padding: 18px; margin-bottom: 14px; min-height: 130px; display: flex; flex-direction: column; justify-content: space-between; }
+    .card-chip .number { letter-spacing: 2px; font-size: 20px; font-weight: 900; }
+    .card-row { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
+
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,.58); display: none; place-items: center; z-index: 100; padding: 24px; }
+    .modal.show { display: grid; }
+    .modal-card { width: min(460px, 100%); background: #0a1511; border: 1px solid var(--line); border-radius: 30px; padding: 26px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+    .symbol { width: 78px; height: 78px; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 14px; font-size: 38px; font-weight: 1000; }
+    .symbol.win { background: var(--green); color: #01140a; }
+    .symbol.lost { background: var(--red); color: #220204; }
+    .symbol.pending { background: var(--yellow); color: #151000; }
+
+    .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%); background: rgba(10,22,18,.96); border: 1px solid rgba(216,156,18,.24); color: var(--text); border-radius: 16px; padding: 12px 16px; display: none; z-index: 120; }
+    .toast.show { display: block; }
+
+    @media (max-width: 1100px) {
+      .desktop-app { grid-template-columns: 220px 1fr; }
+      .right-panel { display: none; }
+      .match-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="desktop-app">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">V</div><span>VICTO</span></div>
+      <nav class="nav">
+        <button class="active" onclick="go('home')">⌂ Accueil</button>
+        <button onclick="go('sports')">◉ Sports</button>
+        <button onclick="go('tickets')">▤ Tickets</button>
+        <button onclick="go('slip')">◆ Ticket de pari</button>
+        <button onclick="go('account')">☻ Compte</button>
+      </nav>
+      <div class="wallet-card"><span>Solde disponible</span><strong id="wallet">352,40 €</strong></div>
+    </aside>
+
+    <main class="main">
+      <section id="home" class="screen active">
+        <div class="top-hero">
+          <span class="tag">Soirée sport</span>
+          <h1>Paris en direct,<br>cotes boostées</h1>
+          <p>Suivez les plus grandes affiches et vos tickets en temps réel.</p>
+        </div>
+        <div class="section-title"><h2>Paris du moment</h2><span>Mis en avant</span></div>
+        <div class="promo-grid">
+          <div class="promo-card" onclick="go('sport-foot')"><img src="./foot_01.jpg" alt="Football"><div class="overlay"><span class="tag">Football</span><h3>Pari Football</h3><p>Paris Nord vs Madrid Sud · Cotes boostées ce soir</p><span class="mini-cta">Parier maintenant</span></div></div>
+          <div class="promo-card" onclick="go('sport-tennis')"><img src="./tennis_01.jpg" alt="Tennis"><div class="overlay"><span class="tag">Tennis</span><h3>Pari Tennis</h3><p>L. Moreau vs D. Novak · Opportunités live</p><span class="mini-cta">Voir les cotes</span></div></div>
+        </div>
+        <div class="section-title"><h2>À la une</h2><span>En ce moment</span></div>
+        <div id="featuredMatches" class="match-grid"></div>
+      </section>
+
+      <section id="sports" class="screen"><div class="section-title"><h2>Sports</h2><span>Populaires</span></div><div id="sportsList" class="list"></div></section>
+      <section id="tickets" class="screen"><div class="section-title"><h2>Mes tickets</h2><span id="ticketStatus">Activité récente</span></div><div id="ticketsList"></div></section>
+      <section id="slip" class="screen"><div class="section-title"><h2>Ticket de pari</h2><span>1 sélection</span></div><div class="card"><span class="tag">Sélection</span><h2 id="pickName">Paris Nord gagne</h2><div id="pickMeta" class="muted">Football · Résultat du match</div><div class="field"><label>Cote</label><strong id="pickOdd">1.82</strong></div><div class="field"><label>Mise</label><input id="stakeInput" class="stake-input" inputmode="decimal" value="35" oninput="updateStakeFromInput(this.value)"></div><div class="field"><label>Gain potentiel</label><strong id="potentialWin">63,70 €</strong></div><button class="yellow-btn" onclick="confirmBet()">Valider le ticket</button><button class="ghost-btn" onclick="go('home')">Modifier la sélection</button></div></section>
+      <section id="account" class="screen"><div class="section-title"><h2>Compte</h2><span>Alex</span></div><div class="list"><div class="list-row"><div><strong>Solde disponible</strong><div class="muted">Mise à jour instantanée</div></div><strong id="accountBalance">352,40 €</strong></div><div class="list-row"><div><strong>Total misé aujourd’hui</strong><div class="muted">Tickets validés</div></div><strong id="totalStaked">0,00 €</strong></div><div class="list-row"><div><strong>Résultat net</strong><div class="muted">Gains moins mises</div></div><strong id="netResult">0,00 €</strong></div><div class="list-row" onclick="go('deposit')"><div class="icon">＋</div><div><strong>Ajouter des fonds</strong><div class="muted">Carte enregistrée</div></div><span>›</span></div><div class="list-row" onclick="go('settings')"><div class="icon">⚙</div><div><strong>Réglages</strong><div class="muted">Sécurité, limites</div></div><span>›</span></div></div></section>
+      <div id="dynamicScreens"></div>
+    </main>
+
+    <aside class="right-panel">
+      <div class="section-title"><h2>Ticket rapide</h2><span>En cours</span></div>
+      <div class="card"><span class="tag">Sélection</span><h3 id="sidePickName">Paris Nord gagne</h3><div class="muted" id="sidePickMeta">Football · Résultat du match</div><div class="field"><label>Cote</label><strong id="sidePickOdd">1.82</strong></div><button class="yellow-btn" onclick="go('slip')">Ouvrir le ticket</button></div>
+    </aside>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <div id="modal" class="modal" onclick="closeModal(event)"><div class="modal-card"><div id="modalContent"></div></div></div>
+
+  <script>
+    const START_BALANCE = 352.40;
+    const DEFAULT_STAKE = 35;
+    let balance = START_BALANCE;
+    let totalStaked = 0;
+    let totalWon = 0;
+    let betCount = 0;
+    let selected = { team: 'Paris Nord gagne', odd: 1.82, sport: 'Football', market: 'Résultat du match' };
+    let depositAmount = 20;
+    let customStake = DEFAULT_STAKE;
+    let resultToSettle = null;
+
+    const sports = [
+      { id:'sport-foot', icon:'⚽', name:'Football', desc:'Ligue Hexa, coupes, live', matches:[['Paris Nord','Madrid Sud','21:00',1.82,3.40,4.10],['Olympique Azur','Racing Ouest','20:30',2.05,3.10,3.75],['United Est','Club Atlantique','22:00',1.48,3.80,4.80]] },
+      { id:'sport-tennis', icon:'🎾', name:'Tennis', desc:'Open, challengers, doubles', matches:[['L. Moreau','D. Novak','Set 2',1.54,1.95,2.35],['M. Caron','A. Vidal','18:15',2.20,1.82,1.66],['R. Klein','P. Sousa','19:40',1.72,2.05,2.12]] },
+      { id:'sport-basket', icon:'🏀', name:'Basket', desc:'Europe, USA, national', matches:[['Lyon Métro','Marseille Port','19:45',1.88,1.91,2.04],['Berlin City','Roma Club','20:00',1.62,2.10,2.48],['Nord Stars','Sud Waves','21:30',2.30,1.86,1.58]] },
+      { id:'sport-rugby', icon:'🏉', name:'Rugby', desc:'Top ligues et internationaux', matches:[['Toulouse Rouge','Bordeaux Blanc','20:55',1.46,18.0,2.90],['Ovalie Nord','Sud XV','16:30',2.10,16.0,1.80]] },
+      { id:'sport-hand', icon:'🤾', name:'Handball', desc:'Championnat et coupes', matches:[['Nantes Main','Paris Cercle','18:00',2.05,7.40,1.72],['Lille Nord','Nice Bleu','20:10',1.90,8.00,2.00]] },
+      { id:'sport-hockey', icon:'🏒', name:'Hockey', desc:'Glace et ligues européennes', matches:[['Alpes Ice','Rouen Nord','19:00',2.18,3.80,2.40],['Lions Gel','Bears City','21:00',1.72,4.10,3.20]] },
+      { id:'sport-volley', icon:'🏐', name:'Volley', desc:'Clubs, sélections, live', matches:[['Tours Bloc','Montpellier Filet','17:45',1.67,2.05,2.55],['Nice Serve','Paris Smash','20:15',2.44,1.90,1.61]] },
+      { id:'live', icon:'●', name:'Live', desc:'Événements en cours', matches:[['L. Moreau','D. Novak','6-4 2-1',1.54,1.95,2.35],['Pixel Red','Nova Blue','Carte 3',1.58,2.20,2.55],['Sprint final','Classement points','Live',1.92,2.30,3.00]] },
+      { id:'settings', icon:'⚙', name:'Réglages', desc:'Sécurité et préférences', matches:[] },
+      { id:'deposit', icon:'＋', name:'Ajouter des fonds', desc:'Carte enregistrée', matches:[] }
+    ];
+    const scriptedResults = ['win','lost','lost','lost','win','lost','lost','lost'];
+
+    function money(v){ return `${Math.max(0, Number(v)||0).toFixed(2).replace('.', ',')} €`; }
+    function safe(str){ return String(str).replace(/'/g,"\\'"); }
+
+    function renderAll(){
+      document.getElementById('featuredMatches').innerHTML = sports[0].matches.map((m,i)=>renderMatch(m,'Football',`foot_0${i+2}.jpg`)).join('');
+      document.getElementById('sportsList').innerHTML = sports.map(s=>`<div class="list-row" onclick="go('${s.id}')"><div class="icon">${s.icon}</div><div><strong>${s.name}</strong><div class="muted">${s.desc}</div></div><span>›</span></div>`).join('');
+      document.getElementById('dynamicScreens').innerHTML = sports.map(renderSportPage).join('');
+      renderTicketsSeed(); updateUI(); updateSlip();
+    }
+
+    function renderMatch(m, sportName, imageSrc=''){
+      return `<div class="card">${imageSrc?`<div class="match-image"><img src="${imageSrc}" alt="${safe(sportName)}"></div>`:''}<div class="match-head"><span>${sportName} · ${m[2]}</span><span>+${42+Math.floor(Math.random()*80)} marchés</span></div><div class="teams"><div class="team">${m[0]}</div><div class="score">VS</div><div class="team">${m[1]}</div></div><div class="odds"><button class="odd" onclick="selectOdd(this,'${safe(m[0])} gagne',${m[3]},'${safe(sportName)}','Résultat du match')"><small>1</small>${m[3].toFixed(2)}</button><button class="odd" onclick="selectOdd(this,'Option spéciale',${m[4]},'${safe(sportName)}','Marché spécial')"><small>N/+</small>${m[4].toFixed(2)}</button><button class="odd" onclick="selectOdd(this,'${safe(m[1])} gagne',${m[5]},'${safe(sportName)}','Résultat du match')"><small>2</small>${m[5].toFixed(2)}</button></div></div>`;
+    }
+
+    function renderSportPage(s){
+      if(s.id==='deposit') return renderDepositPage(s);
+      if(s.id==='settings') return renderSettingsPage(s);
+      const content = s.matches.length ? `<div class="match-grid">${s.matches.map(m=>renderMatch(m,s.name)).join('')}</div>` : '<div class="card">Aucun événement disponible.</div>';
+      return `<section id="${s.id}" class="screen"><button class="ghost-btn" onclick="go('sports')">← Retour sports</button><div class="section-title"><h2>${s.icon} ${s.name}</h2><span>${s.desc}</span></div>${content}</section>`;
+    }
+
+    function renderDepositPage(){
+      return `<section id="deposit" class="screen"><button class="ghost-btn" onclick="go('account')">← Retour compte</button><div class="section-title"><h2>＋ Ajouter des fonds</h2><span>Carte enregistrée</span></div><div class="card-chip"><div class="card-row"><strong>Carte bancaire</strong><span>VISA</span></div><div class="number">•••• •••• •••• 4829</div><div class="card-row"><span>ALEX M.</span><span>Expire 09/28</span></div></div><div class="card"><span class="tag">Montant</span><div class="amount-grid"><button class="amount-btn" onclick="setDepositAmount(10,this)">10 €</button><button class="amount-btn active" onclick="setDepositAmount(20,this)">20 €</button><button class="amount-btn" onclick="setDepositAmount(50,this)">50 €</button><button class="amount-btn" onclick="setDepositAmount(100,this)">100 €</button></div><input id="manualAmount" class="input-like" inputmode="decimal" placeholder="Autre montant" oninput="setManualAmount(this.value)"></div><div class="card"><span class="tag">Sécurité</span><p class="muted">Saisissez le cryptogramme de la carte enregistrée.</p><input id="cvvInput" class="input-like" inputmode="numeric" maxlength="3" placeholder="CVV" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,3)"><button class="yellow-btn" onclick="openDepositConfirm()">Créditer mon compte</button></div></section>`;
+    }
+
+    function renderSettingsPage(){ return `<section id="settings" class="screen"><button class="ghost-btn" onclick="go('account')">← Retour compte</button><div class="section-title"><h2>⚙ Réglages</h2><span>Préférences</span></div><div class="card"><strong>Notifications</strong><p class="muted">Résultats, cotes, alertes</p></div><div class="card"><strong>Sécurité</strong><p class="muted">Connexion et validation</p></div><button class="danger-btn" onclick="resetDemo()">Supprimer mon compte</button></section>`; }
+
+    function go(id){
+      document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
+      const roots=['home','sports','tickets','slip','account'];
+      document.querySelectorAll('.nav button').forEach((b,i)=>b.classList.toggle('active',roots[i]===id));
+    }
+
+    function selectOdd(el, team, odd, sport, market){
+      document.querySelectorAll('.odd').forEach(o=>o.classList.remove('selected'));
+      el.classList.add('selected'); selected={team,odd,sport,market}; updateSlip(false); showToast('Sélection ajoutée au ticket');
+    }
+
+    function currentStake(){ const parsed=parseFloat(String(customStake).replace(',','.')); const wanted=!isNaN(parsed)&&parsed>0?parsed:DEFAULT_STAKE; return Math.min(balance,wanted); }
+    function updateStakeFromInput(value){ const parsed=parseFloat(String(value).replace(',','.').replace(/[^0-9.]/g,'')); customStake=!isNaN(parsed)&&parsed>0?parsed:DEFAULT_STAKE; updateSlip(false); }
+    function updateSlip(syncInput=true){
+      document.getElementById('pickName').textContent=selected.team; document.getElementById('pickMeta').textContent=`${selected.sport} · ${selected.market}`; document.getElementById('pickOdd').textContent=selected.odd.toFixed(2);
+      const stakeInput=document.getElementById('stakeInput'); if(stakeInput&&syncInput) stakeInput.value=String(currentStake()).replace('.',','); document.getElementById('potentialWin').textContent=money(currentStake()*selected.odd);
+      document.getElementById('sidePickName').textContent=selected.team; document.getElementById('sidePickMeta').textContent=`${selected.sport} · ${selected.market}`; document.getElementById('sidePickOdd').textContent=selected.odd.toFixed(2);
+    }
+
+    function confirmBet(){ const stake=currentStake(); if(stake<=0){ showEmptyBalance(); return; } showBetConfirm(stake); }
+    function showBetConfirm(stake){ document.getElementById('modal').classList.add('show'); document.getElementById('modalContent').innerHTML=`<div class="symbol pending">◆</div><h2>Confirmer le pari</h2><p class="muted">${selected.team}<br>${selected.sport} · Cote ${selected.odd.toFixed(2)} · Mise ${money(stake)}</p><div class="field"><label>Gain potentiel</label><strong>${money(stake*selected.odd)}</strong></div><button class="yellow-btn" onclick="placeBetAfterConfirm()">Je parie</button><button class="ghost-btn" onclick="hideModal()">Annuler</button>`; }
+    function placeBetAfterConfirm(){
+      hideModal(); const stake=currentStake(); if(stake<=0){ showEmptyBalance(); return; }
+      betCount++; totalStaked+=stake; balance=Math.max(0,balance-stake); const outcome=scriptedResults[Math.min(betCount-1,scriptedResults.length-1)];
+      if(outcome==='win'){ const winAmount=Math.round(stake*selected.odd*100)/100; addTicket('win',stake,winAmount); resultToSettle={type:'win',stake,winAmount,settled:false}; }
+      else { addTicket('lost',stake,0); resultToSettle={type:'lost',stake,winAmount:0,settled:true}; }
+      updateUI(); updateSlip(false); showBetValidated();
+    }
+    function showBetValidated(){ document.getElementById('modalContent').innerHTML=`<div class="symbol pending">✓</div><h2>Pari validé</h2><p class="muted">Votre ticket a bien été enregistré.</p><button class="yellow-btn" onclick="hideModal()">Fermer</button>`; document.getElementById('modal').classList.add('show'); }
+    function addTicket(status,stake,winAmount){ const isWin=status==='win'; const list=document.getElementById('ticketsList'); list.insertAdjacentHTML('afterbegin',`<div class="ticket ${isWin?'win':'lost'}"><span class="tag ${isWin?'green':'red'}">${isWin?'Gagné':'Perdu'}</span><strong>${selected.team}</strong><div class="muted">${selected.sport} · Cote ${selected.odd.toFixed(2)} · Mise ${money(stake)}</div><button class="yellow-btn" onclick="showResult('${isWin?'win':'lost'}',${stake},${winAmount})">Voir le résultat</button></div>`); }
+    function renderTicketsSeed(){ document.getElementById('ticketsList').innerHTML=`<div class="ticket"><span class="tag">En cours</span><strong>Combiné football</strong><div class="muted">3 sélections · Gain potentiel 68,64 €</div><button class="yellow-btn" onclick="showResult('lost',35,0)">Voir le résultat</button></div><div class="ticket win"><span class="tag green">Gagné</span><strong>Tennis live</strong><div class="muted">L. Moreau vainqueur · Gain 30,80 €</div><button class="ghost-btn" onclick="showResult('win',20,30.8)">Voir le résultat</button></div>`; }
+    function showResult(type,stake,winAmount){ const isWin=type==='win'; if(isWin) resultToSettle={type,stake,winAmount,settled:false}; document.getElementById('modalContent').innerHTML=`<div class="symbol ${isWin?'win':'lost'}">${isWin?'✓':'×'}</div><h2>${isWin?'Ticket gagnant':'Ticket perdant'}</h2><p class="muted">${isWin?`Gain crédité : ${money(winAmount)}.`:`La mise de ${money(stake)} n’a pas été récupérée.`}</p><button class="yellow-btn" onclick="closeResultAndSettle()">Fermer</button>`; document.getElementById('modal').classList.add('show'); }
+    function closeResultAndSettle(){ if(resultToSettle&&!resultToSettle.settled&&resultToSettle.type==='win'){ totalWon+=resultToSettle.winAmount; balance+=resultToSettle.winAmount; resultToSettle.settled=true; updateUI(); } resultToSettle=null; hideModal(); }
+    function showEmptyBalance(){ document.getElementById('modalContent').innerHTML=`<div class="symbol lost">!</div><h2>Solde indisponible</h2><p class="muted">Votre solde disponible est insuffisant.</p><button class="yellow-btn" onclick="hideModal();go('account')">Voir mon compte</button>`; document.getElementById('modal').classList.add('show'); }
+
+    function updateUI(){ document.getElementById('wallet').textContent=money(balance); document.getElementById('accountBalance').textContent=money(balance); document.getElementById('totalStaked').textContent=money(totalStaked); const net=totalWon-totalStaked; const netEl=document.getElementById('netResult'); netEl.textContent=`${net>=0?'+':'-'}${money(Math.abs(net))}`; netEl.style.color=net>=0?'var(--green)':'var(--red)'; }
+    function setDepositAmount(amount,el){ depositAmount=amount; document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('active')); if(el)el.classList.add('active'); const manual=document.getElementById('manualAmount'); if(manual)manual.value=''; }
+    function setManualAmount(value){ const parsed=parseFloat(String(value).replace(',','.').replace(/[^0-9.]/g,'')); if(!isNaN(parsed)&&parsed>0) depositAmount=parsed; document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('active')); }
+    function openDepositConfirm(){ const cvv=document.getElementById('cvvInput')?.value||''; if(cvv.length!==3){ showToast('Code de sécurité incomplet.'); return; } document.getElementById('modalContent').innerHTML=`<div class="symbol pending">＋</div><h2>Confirmer le dépôt</h2><p class="muted">Carte •••• 4829<br>Montant à créditer : ${money(depositAmount)}</p><button class="yellow-btn" onclick="confirmDeposit()">Valider le paiement</button><button class="ghost-btn" onclick="hideModal()">Annuler</button>`; document.getElementById('modal').classList.add('show'); }
+    function confirmDeposit(){ balance+=depositAmount; updateUI(); hideModal(); showToast(`Compte crédité de ${money(depositAmount)}.`); go('account'); }
+    function resetDemo(){ balance=START_BALANCE; totalStaked=0; totalWon=0; betCount=0; customStake=DEFAULT_STAKE; resultToSettle=null; renderTicketsSeed(); updateUI(); updateSlip(); showToast('Compte mis à jour.'); go('account'); }
+    function showToast(message){ const toast=document.getElementById('toast'); toast.textContent=message; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),2400); }
+    function hideModal(){ document.getElementById('modal').classList.remove('show'); }
+    function closeModal(e){ if(e.target.id==='modal') hideModal(); }
+
+    renderAll();
+  </script>
+</body>
+</html>
